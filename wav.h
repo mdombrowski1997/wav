@@ -177,55 +177,24 @@ void WAV_PrintHeader( const struct WAV_Data* wav ) {
 }
 void WAV_PrintChannels( const struct WAV_Data* wav ) {
     int Bps = wav->bps%8 ? wav->bps/8+1 : wav->bps/8;//Btyes per Sample
-    unsigned char** cd = (unsigned char**)malloc(wav->chan);//container for each channel
-    int i;      //iterator
+    unsigned char** cd = (unsigned char**)malloc(wav->chan*sizeof(unsigned char*));//container for each channel
+    int i, j;   //iterators
     int spc;    //SamplesPerChannel - number of samples each channel has
         spc = 8*wav->ds / (wav->chan * wav->bps);
     //allocate space for channel data
-    for (i = 0; i < wav->chan-1; ++i) {
+    for (i = 0; i < wav->chan; ++i) {
         cd[i] = (unsigned char*)malloc( spc*Bps );
     }
 
-    //TODO: THIS ONLY DOES THE FIRST CHANNEL
-    // I'M IGNORING THE REST FOR NOW
     //organize data by channel into their containers
-    for (i = 0; i < spc; ++i) {
-        cd[0][i] = (unsigned char)wav->data[i];
+    for (i = 0; i < wav->chan; ++i) {
+        for (j = 0; j < spc*Bps; ++j) {
+            cd[i][j] = (unsigned char)wav->data[j*Bps];
+        }
     }
     //print all the samples for a channel
     for (i = 0; i < spc; ++i) {
         printf( "%i,", cd[0][i] );
-    }
-    printf("\n");
-
-    //give back my space
-    for (i = 0; i < wav->chan-1; ++i) {
-        free( cd[i] );
-    }
-    free( cd );
-}
-void WAV_DFT( const struct WAV_Data* wav ) {
-    int Bps = wav->bps%8 ? wav->bps/8+1 : wav->bps/8;//Btyes per Sample
-    unsigned char** cd = (unsigned char**)malloc(wav->chan);//container for each channel
-    int i;      //iterator
-    int spc;    //SamplesPerChannel - number of samples each channel has
-        spc = 8*wav->ds / (wav->chan * wav->bps);
-    int dft = 0;
-    //allocate space for channel data
-    for (i = 0; i < wav->chan-1; ++i) {
-        cd[i] = (unsigned char*)malloc( spc*Bps );
-    }
-
-    //TODO: THIS ONLY DOES THE FIRST CHANNEL
-    // I'M IGNORING THE REST FOR NOW
-    //organize data by channel into their containers
-    for (i = 0; i < spc; ++i) {
-        cd[0][i] = (unsigned char)wav->data[i];
-    }
-    //TODO: calculate DFT given samples
-    //print resulting DFT values
-    for (i = 0; i < spc; ++i) {
-        printf( "%i,", dft[0][i] );
     }
     printf("\n");
 
